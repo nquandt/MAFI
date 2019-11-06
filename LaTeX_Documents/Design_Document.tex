@@ -10,26 +10,41 @@
 \usepackage{hyperref}
 \usepackage{indentfirst}
 \usepackage{multicol}
-
-\def\rcurs{{\mbox{$\resizebox{.16in}{.08in}{\includegraphics{ScriptR}}$}}}
-\def\brcurs{{\mbox{$\resizebox{.16in}{.08in}{\includegraphics{BoldR}}$}}}
-\def\hrcurs{{\mbox{$\hat \brcurs$}}}
+\usepackage{bookmark}
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
 
 \renewcommand{\baselinestretch}{0.9}
-\def\rcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{ScriptR}}$}}}
+\renewcommand{\rmdefault}{ptm}
 
 \pagestyle{fancy}
 \fancyhf{}
+\setlength{\headheight}{15pt}
 \rhead{Nicholas Quandt}
 \lhead{McMaster Add-In Iteration 1}
 \rfoot{Page \thepage}
 
-\usepackage{listings}
-\usepackage{xcolor}
-\lstdefinestyle{sharpc}{language=[Sharp]C, frame=lr, rulecolor=\color{blue!80!black}}
-\usepackage{color}
-% http://www.mathworks.com/matlabcentral/fileexchange/8015-m-code-latex-package
-\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+\lstdefinestyle{sharpc}{language=[Sharp]C,
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+keywordstyle=\color{bluekeywords},
+stringstyle=\color{redstrings},
+basicstyle=\ttfamily,
+frame=lr,
+rulecolor=\color{blue!80!black}
+}
 
 \begin{document}
 \begin{titlepage}
@@ -87,12 +102,12 @@ McMaster.com is a dynamically generated HTML page that only changes via user exp
 \section{User Interface}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{mcMasterButton.JPG}
+    \includegraphics[width=0.5\textwidth]{Figures/mcMasterButton.JPG}
     \caption{The button(far right) addition to the ribbon interface within Autodesk Inventor.}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{webBrowserView.jpg}
+    \includegraphics[width=0.5\textwidth]{Figures/webBrowserView.jpg}
     \caption{The browser instance following the button execute event.}
 \end{figure}
 
@@ -120,14 +135,18 @@ System.Diagnostics.Debug.WriteLine(currentPartNumber);
 \section{References}
 
 \begin{itemize}
-\item https://www.mcmaster.com
+\item https://www.mcmaster.com\cite{McMaster}
 \item https://www.autodesk.com/products/inventor/overview
 \item https://docs.microsoft.com/en-us/dotnet/
 \item https://cefsharp.github.io/
 \item https://modthemachine.typepad.com/
 
 \end{itemize}
-
+\begingroup
+\renewcommand{\section}[2]{}
+\bibliography{srs}
+\bibliographystyle{IEEEtran}
+\endgroup
 \newpage
 \section{Appendix A: Story Cards}
 \begin{itemize}
@@ -144,7 +163,7 @@ System.Diagnostics.Debug.WriteLine(currentPartNumber);
     \item [106] As a user I would like properties like the material added to my file for me.\\
     Acceptance Criteria: Properties are auto-populated on file addition.
     \item [107] As a developer I would like to use C\# \\
-    Acceptance Criteria: All code written with C# on .NET 4.7.2 or newer
+    Acceptance Criteria: All code written with C\# on .NET 4.7.2 or newer
     \item [108] As a developer I shouldn't need to install too many files or packages on the final computer.\\
     Acceptance Criteria: Keep total file count below 3.
     \item [109] As a developer I should well document code to allow for future updates.\\
@@ -157,9 +176,9 @@ System.Diagnostics.Debug.WriteLine(currentPartNumber);
 \section{Appendix B: Code}
 StandardAddInServer.cs
 \lstset{style=sharpc}
-\lstinputlisting{StandardAddInServer.cs}
+\lstinputlisting{Figures/StandardAddInServer.cs}
 \newpage
 MainWindow.xaml.cs
-\lstinputlisting{MainWindow.xaml.cs}
+\lstinputlisting{Figures/MainWindow.xaml.cs}
 
 \end{document}

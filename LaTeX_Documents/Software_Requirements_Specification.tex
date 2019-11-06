@@ -10,27 +10,41 @@
 \usepackage{hyperref}
 \usepackage{indentfirst}
 \usepackage{multicol}
-\usepackage{tikz-uml}
-
-\def\rcurs{{\mbox{$\resizebox{.16in}{.08in}{\includegraphics{ScriptR}}$}}}
-\def\brcurs{{\mbox{$\resizebox{.16in}{.08in}{\includegraphics{BoldR}}$}}}
-\def\hrcurs{{\mbox{$\hat \brcurs$}}}
+\usepackage{bookmark}
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
 
 \renewcommand{\baselinestretch}{0.9}
-\def\rcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{ScriptR}}$}}}
+\renewcommand{\rmdefault}{ptm}
 
 \pagestyle{fancy}
 \fancyhf{}
+\setlength{\headheight}{15pt}
 \rhead{Nicholas Quandt}
 \lhead{McMaster Add-In for Autodesk Inventor}
 \rfoot{Page \thepage}
 
-\usepackage{listings}
-\usepackage{xcolor}
-\lstdefinestyle{sharpc}{language=[Sharp]C, frame=lr, rulecolor=\color{blue!80!black}}
-\usepackage{color}
-% http://www.mathworks.com/matlabcentral/fileexchange/8015-m-code-latex-package
-\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+\lstdefinestyle{sharpc}{language=[Sharp]C,
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+keywordstyle=\color{bluekeywords},
+stringstyle=\color{redstrings},
+basicstyle=\ttfamily,
+frame=lr,
+rulecolor=\color{blue!80!black}
+}
 
 \begin{document}
 \begin{titlepage}
@@ -98,68 +112,13 @@ has a "button" within its interface that opens an embedded web browser directed 
 available from McMaster directly to their design project. MAFI aims to bring a similar interactive embedded system to Inventor. It is not a stand alone 
 program, and runs from within Inventor, via the Inventor API for add-ins. A breakdown of the MAFI class as would be implemented within Inventor is depicted 
 in the following diagram:
-\begin{figure}
-    \begin{center}
-    \begin{tikzpicture}
-    \begin{umlpackage}
-    \umlclass[type=interface]{Application}
-    {}{+ UpdateAddInList() : void\\
-    + LoadAddIn() : void}
-    
-    \umlclass[type=abstract,y=-4.7]{StandardAddInServer}{+ classID : GUID
-    }{- Activate() : void\\
-    - Deactivate() : void\\
-    - InitializeCEF() : void\\
-    - GetSTEPTranslatorAddinID() : string\\
-    + STEP\textunderscore Import() : void\\
-    }
-    \umlclass[x=8.2,y=-4.7]{MainWindow}{- currentPartNumber : string\\
-    - fileList : List\textless string\textgreater \\}{- Browser\textunderscore PreviewMouseDown() : void\\
-    - GetSource() : Task\\
-    - Window\textunderscore Closing() : void\\}
-    
-    \end{umlpackage}
-    \umlcompo[mult1=*, mult2=1]{Application}{StandardAddInServer}
-    \umlcompo[mult1=1, mult2=1]{StandardAddInServer}{MainWindow}
-    \end{tikzpicture}
-    \end{center}
-    \caption{MAFI Class Diagram}
-\end{figure}
 
 \subsection{Product Functionality}
 MAFI will add a "button" to the ribbon interface of Inventor. Clicking this "button" will open an embedded web browser directed to www.mcmaster.com. 
 From this browser the user can explore the McMaster catalog. Once the user has decided on a part they wish to retrieve a model for, the user can navigate 
-to the "Add to Assembly" button that has been injected into the web browser page. This will execute a process that will convert, save, and open the selected 
-part's 3D model. 
-
-\newpage
-\begin{figure}
-    \begin{center}
-    \begin{tikzpicture}  
-    \begin{umlsystem}[x=0,y=2.5]{MAFI} 
-    \umlusecase[x=0,y=-2,name=beginBrowse]{Begin Browsing}
-    \umlusecase[x=2,y=-4,name=navigate]{Navigate to Part} 
-    \umlusecase[x=5,y=-6,name=addA]{Add to Assembly}
-    \umlusecase[x=5,y=-2,name=openP]{Open as Part}
-    \umlusecase[x=-2.2,y=-4,name=exit]{Exit}
-    \umlusecase[x=7.5,y=-4,name=insertP]{Retrieve IProperties}
-    \end{umlsystem} 
-    
-    \umlactor[x=-4, y=0, anchor=east]{User}
-    
-    \umlassoc{User}{beginBrowse}
-    \umlextend{navigate}{beginBrowse}
-    \umlextend{addA}{navigate}
-    \umlextend{openP}{navigate}
-    \umlinclude{insertP}{addA}
-    \umlinclude{insertP}{openP}
-    \umlinclude{exit}{beginBrowse}
-    
-    \end{tikzpicture}
-    \end{center}
-    \caption{Use Case Diagram for User}
-\end{figure}
-During this process the part information data that is provided by the catalog will be added into the saved Inventor file, within it's "IProperties". The user is then able to continue browsing or exit the browser. The user is now able to use this file however they choose, as it has been saved to their files, and added to the project.
+to the "Add to Assembly" button that has been injected into the web browser page. This will execute a process that will convert, save, and open the selected
+part's 3D model. During this process the part information data that is provided by the catalog will be added into the saved Inventor file, within it's "IProperties".
+ The user is then able to continue browsing or exit the browser. The user is now able to use this file however they choose, as it has been saved to their files, and added to the project.
 \subsubsection{Step by Step of Use Case}
 \begin{enumerate}
     \item Begin Browsing McMaster by clicking the "Browse" button in Inventor.
@@ -169,18 +128,17 @@ During this process the part information data that is provided by the catalog wi
     \item Return to step 2 until user chooses to exit.
 \end{enumerate}
 
-
 \subsection{Operating Environment}
 MAFI will run in any Windows 64-bit environment that is capable of running the Inventor application. It is built on .NET Framework 4.7.2 Provided that Inventor has been properly installed, no additional software should be required except for the .dll library and .addin manifest provided for MAFI installation, as is outlined in the MAFI Installation Guide.
 \subsection{User Interface}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{mcMasterButton.JPG}
+    \includegraphics[width=0.5\textwidth]{Figures/mcMasterButton.JPG}
     \caption{The button(far right) addition to the ribbon interface within Autodesk Inventor.}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{webBrowserView.jpg}
+    \includegraphics[width=0.5\textwidth]{Figures/webBrowserView.jpg}
     \caption{The browser instance following the button execute event.}
 \end{figure}
 \end{document}
