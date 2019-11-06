@@ -93,13 +93,72 @@ MAFI will be an application add-in built for Inventor as a method for more effic
 \endgroup
 \section{General Description}
 \subsection{Product Perspective}
-MAFI stems from a similar implementation within the application Fusion 360, which similar to Inventor, is developed by Autodesk, Inc.. Fusion 360 has a "button" within its interface that opens an embedded web browser directed at McMaster to allow for the user to search, find, and add a 3D model available from McMaster directly to their design project. MAFI aims to bring a similar interactive embedded system to Inventor. It is not a stand alone program, and runs from within Inventor, via the Inventor API for add-ins. A breakdown of the MAFI class as would be implemented within Inventor is depicted in the following diagram:
-
+MAFI stems from a similar implementation within the application Fusion 360, which similar to Inventor, is developed by Autodesk, Inc.. Fusion 360 
+has a "button" within its interface that opens an embedded web browser directed at McMaster to allow for the user to search, find, and add a 3D model 
+available from McMaster directly to their design project. MAFI aims to bring a similar interactive embedded system to Inventor. It is not a stand alone 
+program, and runs from within Inventor, via the Inventor API for add-ins. A breakdown of the MAFI class as would be implemented within Inventor is depicted 
+in the following diagram:
+\begin{figure}
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{umlpackage}
+    \umlclass[type=interface]{Application}
+    {}{+ UpdateAddInList() : void\\
+    + LoadAddIn() : void}
+    
+    \umlclass[type=abstract,y=-4.7]{StandardAddInServer}{+ classID : GUID
+    }{- Activate() : void\\
+    - Deactivate() : void\\
+    - InitializeCEF() : void\\
+    - GetSTEPTranslatorAddinID() : string\\
+    + STEP\textunderscore Import() : void\\
+    }
+    \umlclass[x=8.2,y=-4.7]{MainWindow}{- currentPartNumber : string\\
+    - fileList : List\textless string\textgreater \\}{- Browser\textunderscore PreviewMouseDown() : void\\
+    - GetSource() : Task\\
+    - Window\textunderscore Closing() : void\\}
+    
+    \end{umlpackage}
+    \umlcompo[mult1=*, mult2=1]{Application}{StandardAddInServer}
+    \umlcompo[mult1=1, mult2=1]{StandardAddInServer}{MainWindow}
+    \end{tikzpicture}
+    \end{center}
+    \caption{MAFI Class Diagram}
+\end{figure}
 
 \subsection{Product Functionality}
-MAFI will add a "button" to the ribbon interface of Inventor. Clicking this "button" will open an embedded web browser directed to www.mcmaster.com. From this browser the user can explore the McMaster catalog. Once the user has decided on a part they wish to retrieve a model for, the user can navigate to the "Add to Assembly" button that has been injected into the web browser page. This will execute a process that will convert, save, and open the selected part's 3D model. 
+MAFI will add a "button" to the ribbon interface of Inventor. Clicking this "button" will open an embedded web browser directed to www.mcmaster.com. 
+From this browser the user can explore the McMaster catalog. Once the user has decided on a part they wish to retrieve a model for, the user can navigate 
+to the "Add to Assembly" button that has been injected into the web browser page. This will execute a process that will convert, save, and open the selected 
+part's 3D model. 
 
 \newpage
+\begin{figure}
+    \begin{center}
+    \begin{tikzpicture}  
+    \begin{umlsystem}[x=0,y=2.5]{MAFI} 
+    \umlusecase[x=0,y=-2,name=beginBrowse]{Begin Browsing}
+    \umlusecase[x=2,y=-4,name=navigate]{Navigate to Part} 
+    \umlusecase[x=5,y=-6,name=addA]{Add to Assembly}
+    \umlusecase[x=5,y=-2,name=openP]{Open as Part}
+    \umlusecase[x=-2.2,y=-4,name=exit]{Exit}
+    \umlusecase[x=7.5,y=-4,name=insertP]{Retrieve IProperties}
+    \end{umlsystem} 
+    
+    \umlactor[x=-4, y=0, anchor=east]{User}
+    
+    \umlassoc{User}{beginBrowse}
+    \umlextend{navigate}{beginBrowse}
+    \umlextend{addA}{navigate}
+    \umlextend{openP}{navigate}
+    \umlinclude{insertP}{addA}
+    \umlinclude{insertP}{openP}
+    \umlinclude{exit}{beginBrowse}
+    
+    \end{tikzpicture}
+    \end{center}
+    \caption{Use Case Diagram for User}
+\end{figure}
 During this process the part information data that is provided by the catalog will be added into the saved Inventor file, within it's "IProperties". The user is then able to continue browsing or exit the browser. The user is now able to use this file however they choose, as it has been saved to their files, and added to the project.
 \subsubsection{Step by Step of Use Case}
 \begin{enumerate}
