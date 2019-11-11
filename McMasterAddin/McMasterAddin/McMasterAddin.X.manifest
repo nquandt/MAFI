@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+
+  <assemblyIdentity name="McMasterAddin" version="1.0.0.0"></assemblyIdentity>
+
+  <clrClass clsid="{4989fc73-4710-47df-9034-98d770e68fbb}" progid="McMasterAddin.StandardAddInServer" threadingModel="Both" name="McMasterAddin.StandardAddInServer" runtimeVersion=""></clrClass>
+
+  <file name="McMasterAddin.dll" hashalg="SHA1"></file>
+
+</assembly>

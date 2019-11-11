@@ -4,11 +4,13 @@ using reflect = System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Drawing;
-using Inv = Inventor;
+using Inv = Inventor;//two using statements to allow for disambiguation 
+//between Inventor and System.IO namespace at times
 using Inventor;
 using CefSharp.Wpf;
 using CefSharp;
 
+#pragma warning disable IDE1006 //naming rules
 namespace McMasterAddin
 {
   /// <summary>
@@ -20,28 +22,29 @@ namespace McMasterAddin
   [GuidAttribute("4989fc73-4710-47df-9034-98d770e68fbb")]
   public class StandardAddInServer : ApplicationAddInServer
   {
-    // Inventor application object.
-    private Inv.Application m_invApp;
-
     #region ObjectInitialization        
-
-    //user interface event
-    private UserInterfaceEvents m_UIEvents;
-    private static GuidAttribute m_ClientID =
+    private static readonly GuidAttribute m_ClientID =
       (GuidAttribute)System.Attribute.GetCustomAttribute(
         typeof(StandardAddInServer), typeof(GuidAttribute));
-    private static readonly string m_ClientIDstring =
+    public static readonly string m_ClientIDstr =
       "{" + m_ClientID.Value + "}";
 
-    //single button for McMaster Catalog
-    private ButtonDefinition m_butDefinition;
-    private ButtonDefinitionSink_OnExecuteEventHandler 
-      m_butDefinition_OnExecute_Delegate;
+    private bool wasOff = false;
 
-    private UserInterfaceEventsSink_OnResetCommandBarsEventHandler
-        UIESink_OnResetCommandBarsEventDelegate;
-    private UserInterfaceEventsSink_OnResetEnvironmentsEventHandler
-        UIESink_OnResetEnvironmentsEventDelegate;
+    // Inventor application object.
+    public Inv.Application m_invApp;
+    private HeadlessWebBrowser _headlessBrowser;
+
+    public static readonly string urlBase = "https://www.mcmaster.com/";
+    public System.Collections.Generic.List<string> fileList = new System.Collections.Generic.List<string>();
+
+
+    //single button for McMaster Catalog
+    private McMasterButton m_Button;
+    private McMasterImporter m_Importer;
+    //user interface event
+    private UserInterfaceEvents m_UIEvents;
+
     private UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler
         UIESink_OnResetRibbonInterfaceEventDelegate;
 
@@ -65,50 +68,18 @@ namespace McMasterAddin
 
         //initialize AddIn members
         m_invApp = addInSiteObject.Application;
-
-        ControlDefinitions controlDefs = 
-          m_invApp.CommandManager.ControlDefinitions;
+        m_Importer = new McMasterImporter(this);
 
         //initialize event delegates
         m_UIEvents = m_invApp.UserInterfaceManager.UserInterfaceEvents;
 
-        UIESink_OnResetCommandBarsEventDelegate = new
-          UserInterfaceEventsSink_OnResetCommandBarsEventHandler(
-            UIE_OnResetCommandBars);
-        m_UIEvents.OnResetCommandBars += 
-          UIESink_OnResetCommandBarsEventDelegate;
-
-        UIESink_OnResetEnvironmentsEventDelegate = new
-          UserInterfaceEventsSink_OnResetEnvironmentsEventHandler(
-            UIE_OnResetEnvironments);
-        m_UIEvents.OnResetEnvironments +=
-          UIESink_OnResetEnvironmentsEventDelegate;
-
         UIESink_OnResetRibbonInterfaceEventDelegate = new
-          UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(
+    UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(
             UIE_OnResetRibbonInterface);
         m_UIEvents.OnResetRibbonInterface +=
           UIESink_OnResetRibbonInterfaceEventDelegate;
 
-        Stream myStream = reflect.Assembly.GetExecutingAssembly()
-          .GetManifestResourceStream("McMasterAddin.Resources.mcmaster.ico");
-
-        stdole.IPictureDisp largeImage = 
-          PictureDispConverter.ToIPictureDisp(new Icon(myStream));
-
-        //Button definition
-        m_butDefinition = controlDefs.AddButtonDefinition("Browse",
-          "BrowseButton",
-          CommandTypesEnum.kQueryOnlyCmdType, m_ClientIDstring,
-          "Browse McMaster-Carr Inventory", "Use this to find " +
-          "hardware and other products available on McMaster.com",
-          largeImage, largeImage, ButtonDisplayEnum.kAlwaysDisplayText);
-
-        m_butDefinition_OnExecute_Delegate = 
-          new ButtonDefinitionSink_OnExecuteEventHandler(m_but_OnExecute);
-        m_butDefinition.OnExecute += m_butDefinition_OnExecute_Delegate;
-        m_butDefinition.Enabled = true;
-
+        m_Button = new McMasterButton(this);
 
         if (firstTime == true)
         {
@@ -126,31 +97,22 @@ namespace McMasterAddin
           {
             CreateOrUpdateRibbonUserInterface();
           }
-
         }
 
+        InitializeCEF();
       }
       catch (Exception e)
       {
         MessageBox.Show(e.ToString());
       }
-
-      //Keep CEF on until INVENTOR exits, not just the WPF form.
-      CefSharpSettings.ShutdownOnExit = false;
-
-      var settings = new CefSettings();
-
-      //Example of setting a command line argument
-      //Enables WebRTC
-      settings.CefCommandLineArgs.Add("enable-media-stream", "1");
-      //Must call once on main thread, and shutdown on main thread.
-      Cef.Initialize(settings);
     }
 
     public void Deactivate()
     {
       //Need to call on main thread
-      Cef.Shutdown();
+      if (wasOff){
+        Cef.Shutdown();
+      }
     }
 
     public void ExecuteCommand(int commandID)
@@ -173,59 +135,13 @@ namespace McMasterAddin
       }
     }
 
+    #endregion
+
+    #region Event Handlers
+
     private void CreateOrUpdateRibbonUserInterface()
     {
-      UserInterfaceManager UIManager = m_invApp.UserInterfaceManager;
-      Ribbon assemblyRibbon = UIManager.Ribbons["Assembly"];
-      RibbonTab assembleTab = assemblyRibbon.RibbonTabs["id_TabAssemble"];
-      RibbonPanel mcMasterPanel = 
-        assembleTab.RibbonPanels.Add("McMaster Carr", 
-          "McMasterPanel", m_ClientIDstring);
-
-      mcMasterPanel.CommandControls.AddButton(m_butDefinition, true);
-    }
-
-    private void UIE_OnResetCommandBars(
-      ObjectsEnumerator commandBars, NameValueMap context)
-    {
-      UserInterfaceManager UIManager = m_invApp.UserInterfaceManager;
-      Inv.Environment asmEnvironment = UIManager.Environments["AMxAssemblyEnvironment"];
-
-      foreach (CommandBar commandBar in commandBars)
-      {
-        if (commandBar == asmEnvironment.PanelBar.DefaultCommandBar)
-        {
-
-        }
-      }
-    }
-
-    private void UIE_OnResetEnvironments(
-      ObjectsEnumerator environments, NameValueMap context)
-    {
-      try
-      {
-        Inv.Environment environment;
-        for (int environmentCt = 1; 
-          environmentCt <= environments.Count; environmentCt++)
-        {
-          environment = (Inv.Environment)environments[environmentCt];
-          if (environment.InternalName == "PMxPartSketchEnvironment")
-          {
-            //make this command bar accessible in the 
-            //panel menu for the 2d sketch environment.
-            environment.PanelBar.CommandBarList.Add(
-              m_invApp.UserInterfaceManager.CommandBars[
-                "Autodesk:SimpleAddIn:SlotToolbar"]);
-
-            return;
-          }
-        }
-      }
-      catch (Exception e)
-      {
-        MessageBox.Show(e.ToString());
-      }
+      m_Button.AddToUI();
     }
 
     private void UIE_OnResetRibbonInterface(NameValueMap context)
@@ -233,26 +149,98 @@ namespace McMasterAddin
       CreateOrUpdateRibbonUserInterface();
     }
 
-    /// <summary>
-    /// This is the mcMaster-addin button execution
-    /// </summary>
-    /// <param name="Context"></param>
-    void m_but_OnExecute(NameValueMap Context)
-    {
-      //Refer to MainWindow.xaml for code of the browser extension
-      var wpfWindow = new McMasterAddin.MainWindow();
-      //This allows for a WPF control to be displayed without
-      //the need of a fullfledge WPF Application.
-      var helper = new System.Windows.Interop.WindowInteropHelper(wpfWindow);
-      helper.Owner = new IntPtr(m_invApp.MainFrameHWND);
-
-      //Show modal Even though button executions 
-      //seem to start their own threads.
-      wpfWindow.ShowDialog();
-    }
-
     #endregion
 
+    public void GetSource(string url, bool isAssembly)
+    {
+      //Load Offscreen browser to partNumber webpage, to extract file locations
+      _headlessBrowser.OpenUrl(url);
+      System.Threading.Thread.Sleep(1000);
+      string source = "";
+      var tS = _headlessBrowser.Page.EvaluateScriptAsync(
+        @"document.getElementsByTagName('html')[0].innerHTML");
+      tS.Wait();
+      JavascriptResponse response = tS.Result;
+      var result = response.Success ? (response.Result ?? "null") : response.Message;
+      source = (string)result;
+      //Reverse version of REGEX match pattern, to get shortest match due to non-greddy algorithm difficulty
+      string exp = @">il/" + "<PETS D-3>\\\"PETS.+?\\\"=noitpo-dac-mcm-atad \\\"dac--il\\\"=ssalc il<";
+      string[] matchEnds = new string[] { ">il/<PETS D-3>\"", "/\"=noitpo-dac-mcm-atad \"dac--il\"=ssalc il<" };
+      source = ReverseString(source);
+      System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex(exp);
+      System.Text.RegularExpressions.MatchCollection mS = rx.Matches(source);
+      string fileName = "";
+      foreach (System.Text.RegularExpressions.Match x in mS)
+      {
+        fileName = ReverseString(x.Groups[0].Value
+          .Substring(matchEnds[0].Length))
+          .Substring(matchEnds[1].Length);
+      }
+      if (fileName.Length > 0)
+      {        
+        if (Directory.Exists(System.IO.Path.GetTempPath()))
+        {
+          using (var client = new System.Net.WebClient())
+          {
+            string filePath = System.IO.Path.Combine(
+              System.IO.Path.GetTempPath(), url.Substring(urlBase.Length) + ".STEP");
+            System.Diagnostics.Debug.WriteLine(filePath);
+            System.Net.ServicePointManager.SecurityProtocol =
+              System.Net.SecurityProtocolType.Tls | 
+              System.Net.SecurityProtocolType.Tls11 | 
+              System.Net.SecurityProtocolType.Tls12;
+            client.DownloadFile(new System.Uri(
+              System.IO.Path.Combine(urlBase, fileName)), filePath);
+            fileList.Add(filePath);
+            m_Importer.Import(filePath, url.Substring(urlBase.Length),isAssembly);               
+          }
+        }
+      }
+    }
+    /// <summary>
+    /// A method to reverse a string type by 
+    /// converting to charArray and using char[].Reverse method
+    /// </summary>
+    /// <param name="s">The string that you want to reverse the order of</param>
+    /// <returns>A string with reversed character order</returns>
+    public static string ReverseString(string s)
+    {
+      char[] arr = s.ToCharArray();
+      Array.Reverse(arr);
+      return new string(arr);
+    }
+
+    private void InitializeCEF()
+    {
+      //Keep CEF on until INVENTOR exits, not just the WPF form.
+      if (!Cef.IsInitialized) {
+        CefSharpSettings.ShutdownOnExit = false;
+
+        var settings = new CefSettings { RemoteDebuggingPort = 8088 };
+     //   Example of setting a command line argument
+   //     Enables WebRTC
+        settings.CefCommandLineArgs.Add("enable-media-stream", "1");
+        //Must call once on main thread, and shutdown on main thread.
+        Cef.Initialize(settings);
+        wasOff = true;
+      }
+      CefSharpSettings.LegacyJavascriptBindingEnabled = true;
+      _headlessBrowser = new HeadlessWebBrowser();
+    }
+    public void DeleteTempFiles()
+    {
+      try
+      {
+        foreach (string s in fileList)
+        {
+          if (System.IO.File.Exists(s))
+          {
+            System.IO.File.Delete(s);
+          }
+        }
+      }
+      catch { }
+    }
   }
 
   public sealed class PictureDispConverter

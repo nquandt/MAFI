@@ -111,13 +111,13 @@ MAFI will be an application add-in built for Inventor as a method for more effic
 MAFI stems from a similar implementation within the application Fusion 360, which similar to Inventor, is developed by Autodesk, Inc.. Fusion 360 
 has a "button" within its interface that opens an embedded web browser directed at McMaster to allow for the user to search, find, and add a 3D model 
 available from McMaster directly to their design project. MAFI aims to bring a similar interactive embedded system to Inventor. It is not a stand alone 
-program, and runs from within Inventor, via the Inventor API for add-ins. A breakdown of the MAFI class as would be implemented within Inventor is depicted 
+program, and runs from within Inventor, via the Inventor API for add-ins. A breakdown of MAFI's classes as would be implemented within Inventor is depicted 
 in the following diagram:
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=1\textwidth]{Figures/Class_Diagram.pdf}
     \end{center}
-    \caption{Use Case Diagram for User of MAFI}
+    \caption{Reduced Class Diagram of MAFI}
 \end{figure}
 
 \subsection{Product Functionality}
@@ -144,16 +144,38 @@ During this process the part information data that is provided by the catalog wi
 \end{enumerate}
 
 \subsection{Operating Environment}
-MAFI will run in any Windows 64-bit environment that is capable of running the Inventor application. It is built on .NET Framework 4.7.2 Provided that Inventor has been properly installed, no additional software should be required except for the .dll library and .addin manifest provided for MAFI installation, as is outlined in the MAFI Installation Guide.
+MAFI will run in any Windows 64-bit environment that is capable of running the Inventor application. It is built on .NET Framework 4.7.2. Provided that Inventor has been properly installed, no additional software should be required except for the .dll library and .addin manifest provided for MAFI installation, as will be outlined in the MAFI Installation Guide.
 \subsection{User Interface}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Figures/mcMasterButton.JPG}
+    \includegraphics[width=0.7\textwidth]{Figures/mcMasterButton.JPG}
     \caption{The button(far right) addition to the ribbon interface within Autodesk Inventor.}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Figures/webBrowserView.jpg}
+    \includegraphics[width=0.7\textwidth]{Figures/webBrowserView.jpg}
     \caption{The browser instance following the button execute event.}
 \end{figure}
+\begin{figure}[H]
+    \centering    
+    \begin{minipage}{0.6\textwidth}
+        \includegraphics[width=0.9\textwidth]{Figures/webBrowserNewButtons.jpg}
+    \end{minipage}
+    \begin{minipage}{0.2\textwidth}
+        \includegraphics[width=0.9\textwidth]{Figures/webBrowserOld.JPG}
+    \end{minipage}
+    \caption{The alteration of the McMaster webpage for new model saving interactions(new on left, old on right)}
+\end{figure}
+\section{Supplementary Documentation}
+\subsection{Tools for the Creation of Documents and Diagrams}
+\begin{enumerate}
+    \item Visual Studio Code 1.40.0 https://code.visualstudio.com/
+    \item MiKTeX 2.9.7100 https://miktex.org/
+    \item Visio Professional 2019 https://products.office.com/Microsoft/Visio
+\end{enumerate}
+\subsection{Tools for Development of Software}
+\begin{enumerate}
+    \item Visual Studio Community 2019 16.3.8 https://visualstudio.microsoft.com/vs/community/
+\end{enumerate}
+
 \end{document}

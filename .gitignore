@@ -271,3 +271,8 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+/McMasterAddin/.vs/McMasterAddin/v16
+/McMasterAddin/packages
+/McMasterAddin/McMasterAddin.sln
+/McMasterAddin/McMasterAddin/bin/x64/Debug
+/McMasterAddin/McMasterAddin/obj

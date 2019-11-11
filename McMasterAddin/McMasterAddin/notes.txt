@@ -1,0 +1,42 @@
+﻿Project Outline:
+Implement an interface within Autodesk Inventor to allow for dynamic
+	integration of McMaster Carr catalog 3d models.
+
+User Needs:
+1. Runs in Windows 64-bit for Inventor 2019 software.
+2. Use Inventor API to add Button for interface.
+3. Use McMaster online catalog that has links to 3d models of the 
+	majority of their items. Primarily hardware,fasteners etc.
+4. Best to keep online interface from McMaster, and somehow open the 
+	"form" in inventor to access.
+5. Drag and drop from "mcmaster interface" into inventor, for either immediate
+	drop into Assembly, or open as individual part.
+6. Replace "add to cart" button in html with "add to assembly" or "open as part" buttons.
+7. Take product information from online catalog and automatically import 
+	into Inventor part file.
+8. Implement a BIM export to send all McMaster-Carr items onto clipboard 
+	with approriate QTY per assembly.
+
+Possible Revisions after all other features:
+Incorporate a "no model" warning for items that do not have corresponding 3d models.
+Choose folder to save models per project, or per item.
+Always on top.
+Comments throughout code for future revising, if ever McMaster online changes.
+If final release available, contact McMaster to check usability.
+Solidworks Version??
+
+Packages used to complete:
+Autodesk Inventor Interop-2019
+CEFSharp v57.0 for C# chromium embedding. v57.0 is built into Inventor 2019, though .WPF package is not, so that needs to 
+	be included in release of .dll's.
+
+Questions for users:
+How would you like McMaster to interface with the CAD environment?
+What sort of features would you like to see between the McMaster catalog and CAD?
+Should you be able to open the "parts" straight from the catalog, or save them and open after, or both?
+Do you want to see drag-drop from catalog to CAD?
+Should the files be autopopulated with material properties and other valuable information?
+Should all mcmaster components be saved to one folder, or should it ask everytime you pick a part?
+What other features would be important?
+If it doesn't have a model for a part, would you still want the properties, or should it just raise a flag and say "No Model Available"?
+

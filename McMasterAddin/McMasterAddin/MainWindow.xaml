@@ -7,19 +7,23 @@
         xmlns:converter="clr-namespace:McMasterAddin.Converter"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
         Title="McMaster Addin"
-        WindowState="Normal">
+        WindowState="Normal" Loaded="Window_Loaded" Closing="Window_Closing">
     <Window.Resources>
         <converter:TitleConverter x:Key="TitleConverter"/>
         <converter:EnvironmentConverter x:Key="EnvironmentConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-    </Window.Resources>    
+    </Window.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40*"/>
+            <ColumnDefinition Width="87*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        <Grid>
+        <Grid Grid.ColumnSpan="2" Margin="0">
             <Grid.Resources>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Margin" Value="2,5" />
@@ -29,24 +33,21 @@
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="65" />
+                <ColumnDefinition Width="65" />
+                <ColumnDefinition Width="100*"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Back" Command="{Binding WebBrowser.BackCommand, ElementName=Browser}" Width="50"/>
-            <Button Content="Forward" Command="{Binding WebBrowser.ForwardCommand, ElementName=Browser}" Grid.Column="1" Width="60"/>
-            <TextBox x:Name="txtBoxAddress" Text="{Binding Address, ElementName=Browser, FallbackValue=www.google.com}" Grid.Column="2" FontSize="12" BorderBrush="Gray" BorderThickness="1">
+            <Button Content="Back" Command="{Binding WebBrowser.BackCommand, ElementName=Browser}" Margin="2"/>
+            <Button Content="Forward" Command="{Binding WebBrowser.ForwardCommand, ElementName=Browser}" Grid.Column="1" Margin="2"/>
+            <TextBox x:Name="txtBoxAddress" Text="{Binding Address, ElementName=Browser, FallbackValue=www.google.com}" Grid.Column="2" FontSize="12" BorderBrush="Gray" BorderThickness="1" Margin="2" Grid.ColumnSpan="3">
                 <i:Interaction.Behaviors>
                     <behaviours:TextBoxBindingUpdateOnEnterBehaviour />
                 </i:Interaction.Behaviors>
             </TextBox>
         </Grid>
-        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1">
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1" Grid.ColumnSpan="2" Margin="0">
             <wpf:ChromiumWebBrowser x:Name="Browser"
-                                    Address="https://www.mcmaster.com"
-                                    PreviewMouseDown="Browser_PreviewMouseDown">
+                                    Address="https://www.mcmaster.com" Margin="0">
                 <i:Interaction.Behaviors>
                     <behaviours:HoverLinkBehaviour x:Name="HoverLinkBehaviour"/>
                 </i:Interaction.Behaviors>
@@ -54,13 +55,11 @@
         </Border>
         <ProgressBar IsIndeterminate="{Binding IsLoading, ElementName=Browser}"
                      HorizontalAlignment="Stretch"
-                     VerticalAlignment="Top"
                      Width="Auto"
-                     Grid.Row="1"
-                     Height="2"
+                     Grid.Row="2"
                      Visibility="{Binding IsLoading, ElementName=Browser, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     BorderThickness="0" />
-        <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                     BorderThickness="0" Grid.ColumnSpan="2" Margin="0,0.2,-0.4,0" />
+        <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2" Opacity=".7">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -72,12 +71,12 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0">
-                <TextBlock Text="{Binding HoverLink, ElementName=HoverLinkBehaviour}" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+            <StatusBarItem Grid.Column="0" Margin="0">
+                <TextBlock Text="{Binding HoverLink, ElementName=HoverLinkBehaviour}" Grid.Column="2" HorizontalAlignment="Stretch" />
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock HorizontalAlignment="Right" TextAlignment="Right" Grid.Column="3" VerticalAlignment="Center">
+                <TextBlock TextAlignment="Right" Grid.Column="3">
                 Chromium: <Run Text="{Binding Source={x:Static cef:Cef.ChromiumVersion}, Mode=OneTime}" />, CEF: <Run Text="{Binding Source={x:Static cef:Cef.CefVersion}, Mode=OneTime}" />, CefSharp: <Run Text="{Binding Source={x:Static cef:Cef.CefSharpVersion}, Mode=OneTime}"/>, Environment: <Run Text="{Binding Converter={StaticResource EnvironmentConverter}, Mode=OneTime}"/>
                 </TextBlock>
             </StatusBarItem>

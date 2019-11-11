@@ -1,0 +1,14 @@
+<Addin Type="Standard">
+  <!--Created for Autodesk Inventor Version 23.0-->
+  <ClassId>{4989fc73-4710-47df-9034-98d770e68fbb}</ClassId>
+  <ClientId>{4989fc73-4710-47df-9034-98d770e68fbb}</ClientId>
+  <DisplayName>McMasterAddin</DisplayName>
+  <Description>McMasterAddin</Description>
+  <Assembly>McMasterAddin.dll</Assembly>
+  <LoadOnStartUp>1</LoadOnStartUp>
+  <UserUnloadable>1</UserUnloadable>
+  <Hidden>0</Hidden>
+  <SupportedSoftwareVersionGreaterThan>22..</SupportedSoftwareVersionGreaterThan>
+  <DataVersion>1</DataVersion>
+  <UserInterfaceVersion>1</UserInterfaceVersion>
+</Addin>
