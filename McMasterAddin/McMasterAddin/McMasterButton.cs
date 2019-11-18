@@ -15,13 +15,15 @@ namespace McMasterAddin
 
     public ButtonDefinition m_buttonDefinition;
 
+    private MainWindowViewModel mv;
+
     private ButtonDefinitionSink_OnExecuteEventHandler
       m_button_Definition_OnExecute_Delegate;
 
     public McMasterButton(StandardAddInServer s)
     {
       _stAddIn = s;
-      
+       mv = new MainWindowViewModel();
       Stream myStream = System.Reflection.Assembly.
         GetExecutingAssembly().GetManifestResourceStream(
         "McMasterAddin.Resources.mcmaster.ico");
@@ -70,12 +72,13 @@ namespace McMasterAddin
       var wpfWindow = new McMasterAddin.MainWindow(_stAddIn);
       //This allows for a WPF control to be displayed without
       //the need of a fullfledge WPF Application.
+      
       var helper = new System.Windows
         .Interop.WindowInteropHelper(wpfWindow)
       {
         Owner = new IntPtr(_stAddIn.m_invApp.MainFrameHWND)
       };
-
+      wpfWindow.DataContext = mv;
       wpfWindow.ShowDialog();
     }
   }

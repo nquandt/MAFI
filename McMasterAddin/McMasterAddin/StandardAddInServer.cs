@@ -37,7 +37,7 @@ namespace McMasterAddin
 
     public static readonly string urlBase = "https://www.mcmaster.com/";
     public System.Collections.Generic.List<string> fileList = new System.Collections.Generic.List<string>();
-
+    private string savingDirectory = Properties.Settings.Default.projectFolder;
 
     //single button for McMaster Catalog
     private McMasterButton m_Button;
@@ -69,6 +69,10 @@ namespace McMasterAddin
         //initialize AddIn members
         m_invApp = addInSiteObject.Application;
         m_Importer = new McMasterImporter(this);
+        if (savingDirectory == "")
+        {          
+          savingDirectory = m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";        
+        }
 
         //initialize event delegates
         m_UIEvents = m_invApp.UserInterfaceManager.UserInterfaceEvents;
@@ -178,12 +182,12 @@ namespace McMasterAddin
       }
       if (fileName.Length > 0)
       {        
-        if (Directory.Exists(System.IO.Path.GetTempPath()))
+        if (Directory.Exists(savingDirectory))
         {
           using (var client = new System.Net.WebClient())
           {
             string filePath = System.IO.Path.Combine(
-              System.IO.Path.GetTempPath(), url.Substring(urlBase.Length) + ".STEP");
+              savingDirectory, url.Substring(urlBase.Length) + ".STEP");
             System.Diagnostics.Debug.WriteLine(filePath);
             System.Net.ServicePointManager.SecurityProtocol =
               System.Net.SecurityProtocolType.Tls | 
