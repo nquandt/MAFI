@@ -6,8 +6,6 @@ namespace McMasterAddin
   {
     private StandardAddInServer _stAddIn;
     private string translatorID = "";
-    private readonly static string tempDirectory = 
-      System.IO.Path.GetTempPath();
 
     public McMasterImporter(StandardAddInServer s)
     {
@@ -15,13 +13,12 @@ namespace McMasterAddin
       GetTranslatorAddInID("Translator: STEP");
     }
 
-    /// <summary>
-    /// A method for converting a .STEP to .IPT silently and adding to assembly.
-    /// </summary>
-    /// <param name="strFilePath">Path location of .STEP file</param>
-    /// <param name="strFileName">Name of final file without suffix or file path</param>
-    public void Import(string strFilePath, string strFileName,bool isAssembly)
+    public string Translate(string substitutePathVal)
     {
+      string strFilePath = substitutePathVal.Substring(4);
+      string strFileName = strFilePath.Substring(strFilePath.Length - int.Parse(substitutePathVal.Substring(0, 4), System.Globalization.NumberStyles.HexNumber));
+      strFileName = strFileName.Substring(0, strFileName.Length - 5);
+      System.Diagnostics.Debug.WriteLine(strFileName + "///" + strFilePath);
       ApplicationAddIns oAddIns = _stAddIn.m_invApp.ApplicationAddIns;
       TranslatorAddIn oTransAddIn = (TranslatorAddIn)oAddIns.ItemById[translatorID];
       oTransAddIn.Activate();
@@ -42,13 +39,26 @@ namespace McMasterAddin
 
       Document doc = (Document)oDoc;
       _stAddIn.m_invApp.SilentOperation = true;
-      doc.SaveAs(tempDirectory + strFileName + ".ipt", false);
+      string savingDirectory = Properties.Settings.Default.projectFolder;
+      if (savingDirectory == "")
+      {
+        savingDirectory = _stAddIn.m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";
+      }
+      doc.SaveAs(savingDirectory + strFileName + ".ipt", false);      
+      if (System.IO.File.Exists(strFilePath))
+      {
+        System.IO.File.Delete(strFilePath);
+      }
       _stAddIn.m_invApp.SilentOperation = false;
+      doc.Close();
+      return savingDirectory + strFileName + ".ipt";
+    }
 
+    public void Open(string filePath, bool isAssembly)
+    {
       //Add the converted .ipt file into my active assembly
       if (isAssembly)
-      {
-        doc.Close();
+      {        
         //Create an operation matrix that contains information
         //about starting position of my part.
         Matrix oMatrix = _stAddIn.m_invApp
@@ -56,12 +66,11 @@ namespace McMasterAddin
         oMatrix.SetTranslation(_stAddIn.m_invApp
           .TransientGeometry.CreateVector(), true);
         ((AssemblyDocument)_stAddIn.m_invApp.ActiveDocument)
-          .ComponentDefinition.Occurrences.Add(tempDirectory
-          + strFileName + ".ipt", oMatrix);
+          .ComponentDefinition.Occurrences.Add(filePath, oMatrix);
       }
       else
       {
-        doc.Views.Add();
+        Document doc = _stAddIn.m_invApp.Documents.Open(filePath);
       }
     }
 

@@ -34,5 +34,29 @@ namespace McMasterAddin.Properties {
                 this["projectFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public double heightClosed {
+            get {
+                return ((double)(this["heightClosed"]));
+            }
+            set {
+                this["heightClosed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("600")]
+        public double widthClosed {
+            get {
+                return ((double)(this["widthClosed"]));
+            }
+            set {
+                this["widthClosed"] = value;
+            }
+        }
     }
 }

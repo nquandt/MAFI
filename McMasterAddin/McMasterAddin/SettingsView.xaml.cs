@@ -20,9 +20,9 @@ namespace McMasterAddin
   /// </summary>
   public partial class SettingsView : UserControl
   {
-    private MainWindow _myWindow;
+    //private MainWindow _myWindow;
     private Brush ForegroundColorBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
-    private Brush BackgroundColorBrush;
+    //private Brush BackgroundColorBrush;
 
     public SettingsView()
     {
@@ -32,8 +32,16 @@ namespace McMasterAddin
 
     private void saveButton_Click(object sender, RoutedEventArgs e)
     {
-      Properties.Settings.Default.projectFolder = projectFolderTextBlock.Text;
+      string s = projectFolderTextBlock.Text;
+        if (s.Substring(s.Length-1,1) != @"\")
+      {
+        s += @"\";
+      }
+      Properties.Settings.Default.projectFolder = s;
       Properties.Settings.Default.Save();
+      if (cancelButton.Command.CanExecute(cancelButton.CommandParameter)){
+        cancelButton.Command.Execute(cancelButton.CommandParameter);
+      }
     }
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e)

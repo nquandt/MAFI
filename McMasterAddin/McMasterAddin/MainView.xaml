@@ -37,14 +37,14 @@
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="75" />
-                <ColumnDefinition Width="75" />
+                <ColumnDefinition Width="76" />
+                <ColumnDefinition Width="74" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="75" />
+                <ColumnDefinition Width="76" />
             </Grid.ColumnDefinitions>
             <Button Content="Back" Command="{Binding WebBrowser.BackCommand, ElementName=Browser}" Margin="4 4 2 4" Background="#FFEFEFEF"/>
-            <Button Content="Forward" Command="{Binding WebBrowser.ForwardCommand, ElementName=Browser}" Grid.Column="1" Margin="4" Background="#FFEFEFEF"/>
-            <TextBox x:Name="txtBoxAddress" Text="{Binding Address, ElementName=Browser, FallbackValue=www.google.com}" Grid.Column="2" FontSize="12" BorderBrush="Gray" BorderThickness="1" Margin="4">
+            <Button Content="Forward" Command="{Binding WebBrowser.ForwardCommand, ElementName=Browser}" Grid.Column="1" Margin="2 4 2 4" Background="#FFEFEFEF"/>
+            <TextBox x:Name="txtBoxAddress" Text="{Binding Address, ElementName=Browser, FallbackValue=www.google.com}" Grid.Column="2" FontSize="12" BorderBrush="Gray" BorderThickness="1" Margin="2 4 2 4">
                 <i:Interaction.Behaviors>
                     <behaviours:TextBoxBindingUpdateOnEnterBehaviour />
                 </i:Interaction.Behaviors>
@@ -77,7 +77,7 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0" Margin="2 4 4 4">
+            <StatusBarItem Grid.Column="0" Margin="0">
                 <TextBlock Text="{Binding HoverLink, ElementName=HoverLinkBehaviour}" Grid.Column="2"  />
             </StatusBarItem>
             <Separator Grid.Column="1" />

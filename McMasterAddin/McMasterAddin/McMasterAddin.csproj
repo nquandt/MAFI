@@ -223,12 +223,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\CefSharp.Wpf.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\headScript.js" />
     <EmbeddedResource Include="Resources\addButtonScripts.js" />
-    <Content Include="Resources\AddToAssembly.js" />
     <Content Include="notes.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

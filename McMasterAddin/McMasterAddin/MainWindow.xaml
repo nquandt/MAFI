@@ -4,8 +4,8 @@
         Title="McMaster Addin"
         xmlns:local="clr-namespace:McMasterAddin"        
         WindowState="Normal" Closing="Window_Closing" 
-        >
-    
+        Loaded="Window_Loaded">
+
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:UserControl1ViewModel}">
             <local:MainView />                                    

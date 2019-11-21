@@ -93,20 +93,22 @@ namespace McMasterAddin
 
     public JavaScriptInteractionObj()
     {
-    }
 
+    }
+    public void PreLoadStep(string pNumber)
+    {
+      _mW.StandardAddInServer.PreLoadStepFile(pNumber.Replace("partNumber", ""),0);
+    }
     public void AddToAssembly(string pNumber)
     {
       //MessageBox.Show(pNumber);
-      _mW.StandardAddInServer.GetSource(StandardAddInServer.urlBase +
-        pNumber.Replace("partNumber", ""), true);
+      _mW.StandardAddInServer.GetSource(pNumber.Replace("partNumber", ""), true);
     }
 
     public void OpenAsPart(string pNumber)
     {
       //MessageBox.Show(pNumber);
-      _mW.StandardAddInServer.GetSource(StandardAddInServer.urlBase +
-        pNumber.Replace("partNumber", ""), false);
+      _mW.StandardAddInServer.GetSource(pNumber.Replace("partNumber", ""), false);
       _mW.Dispatcher.BeginInvoke(new System.Action(() =>
       {
         _mW.Close();

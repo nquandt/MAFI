@@ -6,6 +6,10 @@ scriptAddButton.text = `function callAddToAssembly(pNumber){
 function callOpenAsPart(pNumber){
     mainWindowOBJ.openAsPart(pNumber.parentElement.id);
 }
+function callPreLoadStep(p){
+    console.log("hello");
+    mainWindowOBJ.preLoadStep(p);
+}
 var mutationObserver = new MutationObserver(function (mutations)
 {
     mutations.forEach(function (mutation)
@@ -29,10 +33,13 @@ var mutationObserver = new MutationObserver(function (mutations)
             }            
         }); 
         if (nodeIDZ != null) {
-            var partNumber = "partNumber".concat(nodeIDZ.id.substr(18));            
+            var partNumber = "partNumber".concat(nodeIDZ.id.substr(18));           
+            callPreLoadStep(partNumber);
             var nodeDiv = document.createElement("div");
             nodeDiv.id = partNumber;
-            nodeIDZ.getElementsByClassName("InLnOrdWebPart_TransInfo")[0].replaceWith(nodeDiv);
+            var nodeSave = nodeIDZ.getElementsByClassName("InLnOrdWebPart_TransInfo")[0]
+            var nodeParent = nodeSave.parentElement;
+            nodeParent.replaceChild(nodeDiv, nodeSave);
             var node = document.getElementById(partNumber);
             var newAssembleButton = document.createElement("button");
             newAssembleButton.className = "button-add-to-order-inline add-to-order customButton";

@@ -33,8 +33,16 @@ namespace McMasterAddin
     private void Window_Closing(object sender,
       System.ComponentModel.CancelEventArgs e)
     {
-      _stAddIn.DeleteTempFiles();
-      ((MainWindowViewModel)DataContext).OnGo1Screen(null);
+      Properties.Settings.Default.heightClosed = this.ActualHeight;
+      Properties.Settings.Default.widthClosed = this.ActualWidth;
+      Properties.Settings.Default.Save();
+      _stAddIn.CleanupTempFiles();      
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+      this.Height = Properties.Settings.Default.heightClosed;
+      this.Width = Properties.Settings.Default.widthClosed;
     }
   }
 

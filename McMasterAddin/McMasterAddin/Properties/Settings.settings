@@ -5,5 +5,11 @@
     <Setting Name="projectFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\CAD CHECKOUT\MCMASTER_REPOSITORY</Value>
     </Setting>
+    <Setting Name="heightClosed" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="widthClosed" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">600</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

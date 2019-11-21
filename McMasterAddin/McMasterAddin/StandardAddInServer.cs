@@ -36,8 +36,8 @@ namespace McMasterAddin
     private HeadlessWebBrowser _headlessBrowser;
 
     public static readonly string urlBase = "https://www.mcmaster.com/";
-    public System.Collections.Generic.List<string> fileList = new System.Collections.Generic.List<string>();
-    private string savingDirectory = Properties.Settings.Default.projectFolder;
+    //public System.Collections.Generic.List<string> fileList = new System.Collections.Generic.List<string>();
+    public System.Collections.Generic.Dictionary<string, string> fileList = new System.Collections.Generic.Dictionary<string, string>();
 
     //single button for McMaster Catalog
     private McMasterButton m_Button;
@@ -69,11 +69,12 @@ namespace McMasterAddin
         //initialize AddIn members
         m_invApp = addInSiteObject.Application;
         m_Importer = new McMasterImporter(this);
-        if (savingDirectory == "")
-        {          
-          savingDirectory = m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";        
+        
+        if (Properties.Settings.Default.projectFolder == "")
+        {
+          Properties.Settings.Default.projectFolder = m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";
+          Properties.Settings.Default.Save();
         }
-
         //initialize event delegates
         m_UIEvents = m_invApp.UserInterfaceManager.UserInterfaceEvents;
 
@@ -155,52 +156,121 @@ namespace McMasterAddin
 
     #endregion
 
-    public void GetSource(string url, bool isAssembly)
+    public void PreLoadStepFile(string pNumber, int open)
     {
-      //Load Offscreen browser to partNumber webpage, to extract file locations
-      _headlessBrowser.OpenUrl(url);
-      System.Threading.Thread.Sleep(1000);
-      string source = "";
-      var tS = _headlessBrowser.Page.EvaluateScriptAsync(
-        @"document.getElementsByTagName('html')[0].innerHTML");
-      tS.Wait();
-      JavascriptResponse response = tS.Result;
-      var result = response.Success ? (response.Result ?? "null") : response.Message;
-      source = (string)result;
-      //Reverse version of REGEX match pattern, to get shortest match due to non-greddy algorithm difficulty
-      string exp = @">il/" + "<PETS D-3>\\\"PETS.+?\\\"=noitpo-dac-mcm-atad \\\"dac--il\\\"=ssalc il<";
-      string[] matchEnds = new string[] { ">il/<PETS D-3>\"", "/\"=noitpo-dac-mcm-atad \"dac--il\"=ssalc il<" };
-      source = ReverseString(source);
-      System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex(exp);
-      System.Text.RegularExpressions.MatchCollection mS = rx.Matches(source);
-      string fileName = "";
-      foreach (System.Text.RegularExpressions.Match x in mS)
+      if (!fileList.ContainsKey(pNumber))
       {
-        fileName = ReverseString(x.Groups[0].Value
-          .Substring(matchEnds[0].Length))
-          .Substring(matchEnds[1].Length);
-      }
-      if (fileName.Length > 0)
-      {        
-        if (Directory.Exists(savingDirectory))
+        fileList.Add(pNumber, "initialized");
+
+        string savingDirectory = Properties.Settings.Default.projectFolder;
+        foreach (string s in System.IO.Directory.GetFiles(savingDirectory))
         {
-          using (var client = new System.Net.WebClient())
+          if (s.Substring(savingDirectory.Length).Contains(pNumber))
           {
-            string filePath = System.IO.Path.Combine(
-              savingDirectory, url.Substring(urlBase.Length) + ".STEP");
-            System.Diagnostics.Debug.WriteLine(filePath);
-            System.Net.ServicePointManager.SecurityProtocol =
-              System.Net.SecurityProtocolType.Tls | 
-              System.Net.SecurityProtocolType.Tls11 | 
-              System.Net.SecurityProtocolType.Tls12;
-            client.DownloadFile(new System.Uri(
-              System.IO.Path.Combine(urlBase, fileName)), filePath);
-            fileList.Add(filePath);
-            m_Importer.Import(filePath, url.Substring(urlBase.Length),isAssembly);               
+            if (s.Contains(".ipt"))
+            {
+              fileList[pNumber] = "exists:" + s;
+              return;
+            }
           }
+        }        
+        
+        //Load Offscreen browser to partNumber webpage, to extract file locations
+        int tries = 0;
+        string fileName = "";
+      retry:
+        if (tries < 3)
+        {
+          string url = urlBase + pNumber;
+          _headlessBrowser.OpenUrl(url);
+          var tS = _headlessBrowser.Page.EvaluateScriptAsync(@"var a = 'empty';for (let i of document.getElementsByClassName('li--cad')){if (i.dataset.mcmCadOption.includes('STEP')){a = i.dataset.mcmCadOption;}} a;");
+          tS.Wait();
+          JavascriptResponse response = tS.Result;
+          var result = response.Success ? (response.Result ?? "null") : response.Message;
+          fileName = (string)result;
+          if (!fileName.Contains(pNumber))
+          {            
+            tries++;
+            System.Threading.Thread.Sleep(500);
+            goto retry;
+          }
+          else
+          {
+            fileList[pNumber] = urlBase + fileName.Substring(1);
+            System.Diagnostics.Debug.WriteLine("url: " + fileName);
+            fileName = ReverseString(fileName);
+            fileName = ReverseString(fileName.Substring(0, fileName.IndexOf('/')));
+            System.Diagnostics.Debug.WriteLine("good to go: " + fileName);
+            if (Directory.Exists(savingDirectory))
+            {
+              using (var client = new System.Net.WebClient())
+              {                
+                string filePath = System.IO.Path.Combine(savingDirectory, fileName);//Saving Directory for .step temp file
+                System.Diagnostics.Debug.WriteLine(filePath);
+                System.Net.ServicePointManager.SecurityProtocol =
+                  System.Net.SecurityProtocolType.Tls |
+                  System.Net.SecurityProtocolType.Tls11 |
+                  System.Net.SecurityProtocolType.Tls12;
+                fileList[pNumber] = "beginDownload:" + fileList[pNumber];
+                client.DownloadFile(new System.Uri(fileList[pNumber].Substring("beginDownload:".Length)), filePath);
+                fileList[pNumber] = "isDownloaded:" + fileName.Length.ToString("X4") + filePath;
+                fileList[pNumber] = "exists:" + m_Importer.Translate(fileList[pNumber].Substring("isDownloaded:".Length));
+                if (open != 0)
+                {
+                  bool isAssembly = true;
+                  if (open == 2)
+                  {
+                    isAssembly = false;
+                  }
+                  m_Importer.Open(fileList[pNumber].Substring("exists:".Length), isAssembly);
+                }
+              }
+            }
+          }
+        }
+        else
+        {
+          fileList.Remove(pNumber);
+          MessageBox.Show("Couldn't retrieve " + pNumber);          
         }
       }
     }
+
+    public void GetSource(string pNumber, bool isAssembly)
+    {
+      if (fileList.ContainsKey(pNumber))
+      {
+        int tries = 0;
+      retry:
+        if (tries < 20)
+        {
+          if (fileList[pNumber].Contains("exists"))
+          {
+            m_Importer.Open(fileList[pNumber].Substring("exists:".Length), isAssembly);
+          }
+
+        }
+        else {
+          if (fileList[pNumber].Contains("isDownloaded"))
+          {
+            tries = 0;
+          }                     
+              tries++;
+              System.Threading.Thread.Sleep(500);
+              goto retry;           
+        }
+      }
+      else
+      {
+        int open = 2;
+        if (isAssembly)
+        {
+          open = 1;
+        }
+        PreLoadStepFile(pNumber, open);
+      }
+    }
+
     /// <summary>
     /// A method to reverse a string type by 
     /// converting to charArray and using char[].Reverse method
@@ -231,22 +301,25 @@ namespace McMasterAddin
       CefSharpSettings.LegacyJavascriptBindingEnabled = true;
       _headlessBrowser = new HeadlessWebBrowser();
     }
-    public void DeleteTempFiles()
+    public void CleanupTempFiles()
     {
       try
       {
-        foreach (string s in fileList)
+        foreach (System.Collections.Generic.KeyValuePair<string, string> s in fileList)
         {
-          if (System.IO.File.Exists(s))
+          if (s.Value.Contains("isDownloaded"))
           {
-            System.IO.File.Delete(s);
+            if (System.IO.File.Exists(s.Value.Substring("isDownloaded:XXXX".Length)))
+            {
+              System.IO.File.Delete(s.Value.Substring("isDownloaded:XXXX".Length));
+            }
           }
         }
       }
       catch { }
     }
   }
-
+  
   public sealed class PictureDispConverter
 
   {

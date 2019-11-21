@@ -50,16 +50,50 @@ namespace McMasterAddin
 
     public void AddToUI()
     {
+
       UserInterfaceManager UIManager = 
         _stAddIn.m_invApp.UserInterfaceManager;
+
       Ribbon assemblyRibbon = UIManager.Ribbons["Assembly"];
       RibbonTab assembleTab = assemblyRibbon.RibbonTabs["id_TabAssemble"];
-      RibbonPanel mcMasterPanel =
-        assembleTab.RibbonPanels.Add("McMaster Carr",
-          "McMasterPanel", StandardAddInServer.m_ClientIDstr);
+      bool exists = false;
+      foreach (RibbonPanel r in assembleTab.RibbonPanels)
+      {
+        if (r.InternalName == "McMasterPanelAssembly")
+        {
+          exists = true;
+        }
+      }
+      if (!exists)
+      {
+        RibbonPanel mcMasterPanel =
+          assembleTab.RibbonPanels.Add("McMaster-Carr",
+            "McMasterPanelAssembly", StandardAddInServer.m_ClientIDstr);
 
-      mcMasterPanel.CommandControls
-        .AddButton(m_buttonDefinition, true);
+        mcMasterPanel.CommandControls
+          .AddButton(m_buttonDefinition, true);
+      }
+      Ribbon partRibbon = UIManager.Ribbons["Part"];
+
+      RibbonTab partTab = partRibbon.RibbonTabs["id_TabManage"];
+      exists = false;
+      foreach (RibbonPanel r in partTab.RibbonPanels)
+      {
+        if (r.InternalName == "McMasterPanelPart")
+        {
+          exists = true;
+        }
+      }
+      if (!exists)
+      {
+        RibbonPanel mcMasterPanel =
+          partTab.RibbonPanels.Add("McMaster-Carr",
+            "McMasterPanelPart", StandardAddInServer.m_ClientIDstr);
+
+        mcMasterPanel.CommandControls
+          .AddButton(m_buttonDefinition, true);
+      }
+
     }
 
     /// <summary>
