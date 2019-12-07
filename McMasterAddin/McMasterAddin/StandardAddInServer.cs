@@ -72,7 +72,9 @@ namespace McMasterAddin
         
         if (Properties.Settings.Default.projectFolder == "")
         {
-          Properties.Settings.Default.projectFolder = m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";
+          Properties.Settings.Default.projectFolder = 
+            m_invApp.DesignProjectManager.ActiveDesignProject
+            .WorkspacePath + "\\MCMASTER_REPOSITORY\\";
           Properties.Settings.Default.Save();
         }
         //initialize event delegates
@@ -165,7 +167,8 @@ namespace McMasterAddin
         string savingDirectory = Properties.Settings.Default.projectFolder;
         foreach (string s in System.IO.Directory.GetFiles(savingDirectory))
         {
-          if (s.Substring(savingDirectory.Length).Contains(pNumber))
+          if (s.Substring(savingDirectory.Length)
+            .Contains(pNumber))
           {
             if (s.Contains(".ipt"))
             {
@@ -212,9 +215,11 @@ namespace McMasterAddin
                   System.Net.SecurityProtocolType.Tls11 |
                   System.Net.SecurityProtocolType.Tls12;
                 fileList[pNumber] = "beginDownload:" + fileList[pNumber];
-                client.DownloadFile(new System.Uri(fileList[pNumber].Substring("beginDownload:".Length)), filePath);
+                client.DownloadFile(new System.Uri(fileList[pNumber]
+                  .Substring("beginDownload:".Length)), filePath);
                 fileList[pNumber] = "isDownloaded:" + fileName.Length.ToString("X4") + filePath;
-                fileList[pNumber] = "exists:" + m_Importer.Translate(fileList[pNumber].Substring("isDownloaded:".Length));
+                fileList[pNumber] = "exists:" + m_Importer.Translate(fileList[pNumber]
+                  .Substring("isDownloaded:".Length));
                 if (open != 0)
                 {
                   bool isAssembly = true;
@@ -222,7 +227,8 @@ namespace McMasterAddin
                   {
                     isAssembly = false;
                   }
-                  m_Importer.Open(fileList[pNumber].Substring("exists:".Length), isAssembly);
+                  m_Importer.Open(fileList[pNumber]
+                    .Substring("exists:".Length), isAssembly);
                 }
               }
             }
@@ -246,7 +252,8 @@ namespace McMasterAddin
         {
           if (fileList[pNumber].Contains("exists"))
           {
-            m_Importer.Open(fileList[pNumber].Substring("exists:".Length), isAssembly);
+            m_Importer.Open(fileList[pNumber]
+              .Substring("exists:".Length), isAssembly);
           }
 
         }
@@ -309,9 +316,11 @@ namespace McMasterAddin
         {
           if (s.Value.Contains("isDownloaded"))
           {
-            if (System.IO.File.Exists(s.Value.Substring("isDownloaded:XXXX".Length)))
+            if (System.IO.File.Exists(
+              s.Value.Substring("isDownloaded:XXXX".Length)))
             {
-              System.IO.File.Delete(s.Value.Substring("isDownloaded:XXXX".Length));
+              System.IO.File.Delete(
+                s.Value.Substring("isDownloaded:XXXX".Length));
             }
           }
         }

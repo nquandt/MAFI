@@ -42,7 +42,10 @@ namespace McMasterAddin
       string savingDirectory = Properties.Settings.Default.projectFolder;
       if (savingDirectory == "")
       {
-        savingDirectory = _stAddIn.m_invApp.DesignProjectManager.ActiveDesignProject.WorkspacePath + @"\MCMASTER_REPOSITORY\";
+        savingDirectory = 
+          _stAddIn.m_invApp.DesignProjectManager
+          .ActiveDesignProject.WorkspacePath 
+          + "\\MCMASTER_REPOSITORY\\";
       }
       doc.SaveAs(savingDirectory + strFileName + ".ipt", false);      
       if (System.IO.File.Exists(strFilePath))

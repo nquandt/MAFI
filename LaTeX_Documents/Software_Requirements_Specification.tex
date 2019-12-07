@@ -55,7 +55,7 @@ rulecolor=\color{blue!80!black}
  
        \vspace{0.5cm}
         McMaster-Carr Add-In for Autodesk Inventor (MAFI)\\
-        Version 1.0.2 $\bullet$ October 28 2019
+        Version 1.0.4 $\bullet$ December 07 2019
  
        \vspace{1.5cm}
  
@@ -137,6 +137,9 @@ During this process the part information data that is provided by the catalog wi
 \subsubsection{Step by Step of Use Case}
 \begin{enumerate}
     \item Begin Browsing McMaster by clicking the "Browse" button in Inventor.
+    \begin{itemize}
+    \item User may choose to modify settings at any time following the start of browsing.
+    \end{itemize}
     \item User chooses either to navigate to the desired part, or exits which may be done at any time from now on.
     \item If navigating to part, user chooses to either open as an individual part, to add the part directly into the assembly of various parts.
     \item Either choice will result in the retrieval of IProperties for the part.
@@ -149,23 +152,24 @@ MAFI will run in any Windows 64-bit environment that is capable of running the I
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/mcMasterButton.JPG}
-    \caption{The button(far right) addition to the ribbon interface within Autodesk Inventor.}
+    \caption{A new button should be added to the Inventor UI, similar to this image (button on the far right).}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/webBrowserView.jpg}
-    \caption{The browser instance following the button execute event.}
+    \caption{The embedded browser should follow from this demo browser.}
 \end{figure}
 \begin{figure}[H]
     \centering    
-    \begin{minipage}{0.6\textwidth}
-        \includegraphics[width=0.9\textwidth]{Figures/webBrowserNewButtons.jpg}
-    \end{minipage}
     \begin{minipage}{0.2\textwidth}
         \includegraphics[width=0.9\textwidth]{Figures/webBrowserOld.JPG}
     \end{minipage}
-    \caption{The alteration of the McMaster webpage for new model saving interactions(new on left, old on right)}
+    \caption{This is the McMaster "ordering" section, this should be replaced for user iteraction with add-in}
 \end{figure}
+\section{Code Repository}
+\subsection{Changes Tracking and Code Manifest}
+All code shall be kept in a github repository to maintain proper change history, and accessibility from anywhere.\cite{MAFI} Further, this allows 
+for the project to maintain one overarching version, and that any future changes can be made without "bricking" the software. 
 \section{Supplementary Documentation}
 \subsection{Tools for the Creation of Documents and Diagrams}
 \begin{enumerate}

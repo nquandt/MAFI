@@ -55,7 +55,7 @@ rulecolor=\color{blue!80!black}
  
        \vspace{0.5cm}
         McMaster-Carr Add-In for Autodesk Inventor\\
-        Version 1.0.2 $\bullet$ October 28 2019
+        Version 1.0.4 $\bullet$ December 07 2019
  
        \vspace{1.5cm}
  
@@ -108,8 +108,6 @@ for a collection of user stories.
 \item Use McMaster online catalog that has links to 3d models of the majority of their items. Primarily hardware, fasteners, etc.
 \item Best to keep online interface from McMaster, and somehow open the "form" in inventor to access.
 \item Replace "add to cart" button in HTML with "add to assembly" or "open as part" buttons.
-\item Take product information from online catalog and automatically import into Inventor part file.
-\item Implement a bill of materials export to send all McMaster items onto clipboard with appropriate QTY per assembly.
 \end{enumerate}
 \newpage
 \section{Languages and Packages}
@@ -119,8 +117,8 @@ for a collection of user stories.
     \item C\#
     \item XAML
     \item HTML
-    \item Autodesk Inventor Interop
-    \item CEFSharp v57.0 \cite{CEFSharp}
+    \item Autodesk Inventor Interop 2020
+    \item CEFSharp v69.0 \cite{CEFSharp}
     \item .NET 4.7.2 \cite{NET}
 \end{itemize}
 \end{multicols}
@@ -135,6 +133,11 @@ for a collection of user stories.
     \centering
     \includegraphics[width=0.7\textwidth]{Figures/webBrowserView.jpg}
     \caption{The browser instance following the button execute event.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figures/webBrowserSettings.jpg}
+    \caption{The settings page for the Add-In.}
 \end{figure}
 \begin{figure}[H]
     \centering    
@@ -157,7 +160,7 @@ the McMasterImporter class for conversion from a .stp file to .ipt, something In
 order to obtain the html from a dynamically created javascript enabled webpage, an instance of HeadlessWebBrowser is
 used to render the webpage silently.
 \subsection{HeadlessWebBrowser}
-This class is a background process version of the CEFSharp utility. It allows for a silent operation of visiting 
+This class is a background process version of the CefSharp utility. It allows for a silent operation of visiting 
 webpages. This enables the software to obtain the html of the "part" page, which contains the url of the 3D model 
 location.
 \subsection{McMasterButton}
@@ -165,31 +168,40 @@ This class is a template for the button that StandardAddInServer adds to the Inv
 clicking the button, an embedded web-browser will be open, MainWindow, to allow for a user to browse 
 the McMaster catalog for a part they wish to obtain the 3D model of.
 \subsection{MainWindow}
+The MainWindow class is essentially a form that acts as a holder for MainView class and SettingsView class.
+\subsection{MainView}
 This class is the primary interface a user will see while using MAFI. The McMasterButton will create an 
 instance of this web-browser form. Javascript is injected into the web-browser that dynamically adds "Open 
-as Part" and "Add to Assembly" buttons within the webpage. Clicking these buttons will execute methods to begin 
-the importing process, which is handled by the McMasterImporter, owned by the StandardAddInServer.
+as Part" and "Add to Assembly" buttons within the webpage, See Appendix B/addButtonScripts.js for code that is ran via the chromium embedded browser. 
+Clicking these buttons will execute methods to begin 
+the importing process, which is handled by the McMasterImporter, owned by the StandardAddInServer. This class also contains a button 
+for opening the SettingsView class UI.
+\subsection{SettingsView}
+The SettingsView class allows for the user to edit the add-in config file via a set of text boxes. It includes a save and cancel button, both of which return to the MainView. 
 \subsection{McMasterImporter}
 This class locates the Inventor translator feature that allows for .stp to .ipt conversion. Then when called 
 will silently convert a file that was obtained from the McMaster catalog, from MainWindow.
+\subsection{JavaScriptInteractionObj}
+This class is a binding object that is sent from the MainView class to the CefSharp chromium webbrowser as a new javascript object. It allows for callbacks to the .NET underlying application. Essentially 
+this class allows for the new buttons on the McMaster webpage to call to the add-in.
 \section{Extra Notes}
 \begin{itemize}
-    \item CEFSharp v57.0 specifically. v57.0 is built into Inventor 2019, though .WPF package is not, so that needs to be included in release of .dll's.
+    \item CEFSharp v69.0 specifically. v69.0 is built into Inventor 2020, though .WPF package is not, so that may need to be included in release of .dll's, unless it can be embedded.
     \item Possible revisions after all other features:
     \begin{itemize}
+        \item Take product information from online catalog and automatically import into Inventor part file.
+        \item Implement a bill of materials export to send all McMaster items onto clipboard with appropriate QTY per assembly.
         \item Incorporate a "no model" warning for items that do not have corresponding 3d models.
-        \item Choose folder to save models per project, or per item.
-        \item Always on top.
+        \item Option for choosing folder to save models per project, or per item.
+        \item Always on top windowing, currently can end up behind, which leads to difficulties.
         \item Comments throughout code for future revising, if ever McMaster online changes.
         \item If final release available, contact McMaster to check usability, possible copyright or anything legal. 
         \item Possibly develop for use with Solidworks, a similar program by  Dassault Systèmes.
     \end{itemize}
     \item Current Issues:
     \begin{itemize}
-        \item "Add to Assembly"/"Open as Part" import time is too long, possibly look into 
-        pre-conversion of possible part download, such as when a user hover's the button, begin conversion,
-        but if user does not click, delete from memory.
         \item Web browser seems to lag on initial startup.
+        \item During testing, there were cases of crashing while importing. Possibly a threading error.
     \end{itemize}
 \end{itemize}
 \section{References}
@@ -201,45 +213,56 @@ will silently convert a file that was obtained from the McMaster catalog, from M
 \newpage
 \section{Appendix A: Story Cards}
 \begin{itemize}
-    \item [101] As a user I want to be able to use Windows.\\
+    \item [101] As a user I want to be able to use Windows operating system.\\
     Acceptance Criteria: Runs on Windows 64-bit without errors.
-    \item [102] As a user I want to use Autodesk Inventor 2019.\\
-    Acceptance Criteria: Uses Autodesk Inventor 2019 without errors.
-    \item [103] As a user I want to have access to McMaster-Carr catalog from inside of Inventor.\\
-    Acceptance Criteria: No outside browser needed to access catalog.
+    \item [102] As a user I want to use Autodesk Inventor 2020.\\
+    Acceptance Criteria: Uses Autodesk Inventor 2020 without errors.
+    \item [103] As a user I want to have access to McMaster-Carr catalog from within Inventor.\\
+    Acceptance Criteria: No outside browser needed to access catalog, embed chromium into Inventor.
     \item [104] As a user I don't want the interface to change much.\\
-    Acceptance Criteria: Uses original online interface.
-    \item [105] As a user I should be able to add parts from mcmaster right into my project.\\
-    Acceptance Criteria: No outside program or steps needed to import file.
-    \item [106] As a user I want to be able to choose whether to add a part to my open
+    Acceptance Criteria: Uses original McMaster webpage layout, and original Inventor UI, except for new button.
+    \item [105] As a user I should be able to add parts from McMaster right into my project.\\
+    Acceptance Criteria: No outside program or steps needed to import file, all done via Inventor, or windows, in background.
+    \item [106] As a user I want to be able to choose whether to add a part to my current
     assembly or as an individual part.\\
-    Acceptance Criteria: Two individual buttons for "Add to Assembly" "Open as Part".
+    Acceptance Criteria: Two individual buttons for "Add to Assembly" and "Open as Part".
     \item [107] As a user I would like properties like the material added to my file for me.\\
     Acceptance Criteria: Properties are auto-populated on file addition.
-    \item [108] As a developer I would like to use C\# \\
+    \item [108] As a user I would like to have control over the saving location of files imported from McMaster.\\
+    Acceptance Criteria: Incorporate a settings page/config file, for the addin that allows for options such as saving location, file naming conventions.
+    \item [109] As a developer I would like to use C\# \\
     Acceptance Criteria: All code written with C\# on .NET 4.7.2 or newer
-    \item [109] As a developer I shouldn't need to install too many files or packages on the final computer.\\
+    \item [110] As a developer I shouldn't need to install too many files or packages on the final computer.\\
     Acceptance Criteria: Keep total file count below 3.
-    \item [110] As a developer I should well document code to allow for future updates.\\
+    \item [111] As a developer I should well document code to allow for future updates.\\
     Acceptance Criteria: An outside individual can proof read code and follow along without difficulty.
 \end{itemize}
 
 \newpage
 \section{Appendix B: Code}
+All code can be found on the MAFI github repository\cite{MAFI}.\\
 StandardAddInServer.cs
 \lstset{style=sharpc,caption={}}
 \lstinputlisting{../McMasterAddin/McMasterAddin/StandardAddInServer.cs}
 \newpage
-MainWindow.xaml.cs
+HeadlessWebBrowser.cs
 \lstinputlisting{../McMasterAddin/McMasterAddin/HeadlessWebBrowser.cs}
 \newpage
-MainWindow.xaml.cs
+McMasterButton.cs
 \lstinputlisting{../McMasterAddin/McMasterAddin/McMasterButton.cs}
 \newpage
 MainWindow.xaml.cs
 \lstinputlisting{../McMasterAddin/McMasterAddin/MainWindow.xaml.cs}
 \newpage
-MainWindow.xaml.cs
+McMasterImporter.cs
 \lstinputlisting{../McMasterAddin/McMasterAddin/McMasterImporter.cs}
-
+\newpage
+MainView.xaml.cs
+\lstinputlisting{../McMasterAddin/McMasterAddin/MainView.xaml.cs}
+\newpage
+SettingsView.xaml.cs
+\lstinputlisting{../McMasterAddin/McMasterAddin/SettingsView.xaml.cs}
+\newpage
+addButtonScripts.cs
+\lstinputlisting{../McMasterAddin/McMasterAddin/Resources/addButtonScripts.js}
 \end{document}

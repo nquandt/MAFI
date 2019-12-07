@@ -21,10 +21,10 @@ var mutationObserver = new MutationObserver(function (mutations)
             {
                 nodeX.childNodes.forEach(function (nodeY)
                 {
-                    try {
-                        if (nodeY.id.includes("InLnOrd_ItmBxRw_1_"))
-                        { nodeIDZ = nodeY; }
-                    } catch(e) { }
+                  try {
+                     if (nodeY.id.includes("InLnOrd_ItmBxRw_1_"))
+                      { nodeIDZ = nodeY; }
+                  } catch(e) { }
                 });
                 try {
                     if (nodeX.id.includes("InLnOrd_ItmBxRw_1_"))
@@ -33,11 +33,11 @@ var mutationObserver = new MutationObserver(function (mutations)
             }            
         }); 
         if (nodeIDZ != null) {
-            var partNumber = "partNumber".concat(nodeIDZ.id.substr(18));           
-            callPreLoadStep(partNumber);
-            var nodeDiv = document.createElement("div");
-            nodeDiv.id = partNumber;
-            var nodeSave = nodeIDZ.getElementsByClassName("InLnOrdWebPart_TransInfo")[0]
+        var partNumber = "partNumber".concat(nodeIDZ.id.substr(18));           
+        callPreLoadStep(partNumber);
+        var nodeDiv = document.createElement("div");
+        nodeDiv.id = partNumber;
+var nodeSave = nodeIDZ.getElementsByClassName("InLnOrdWebPart_TransInfo")[0];
             var nodeParent = nodeSave.parentElement;
             nodeParent.replaceChild(nodeDiv, nodeSave);
             var node = document.getElementById(partNumber);

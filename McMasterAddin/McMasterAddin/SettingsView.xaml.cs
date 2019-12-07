@@ -19,10 +19,7 @@ namespace McMasterAddin
   /// Interaction logic for SettingsControl.xaml
   /// </summary>
   public partial class SettingsView : UserControl
-  {
-    //private MainWindow _myWindow;
-    private Brush ForegroundColorBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
-    //private Brush BackgroundColorBrush;
+  {    
 
     public SettingsView()
     {
@@ -33,14 +30,16 @@ namespace McMasterAddin
     private void saveButton_Click(object sender, RoutedEventArgs e)
     {
       string s = projectFolderTextBlock.Text;
-        if (s.Substring(s.Length-1,1) != @"\")
+        if (s.Substring(s.Length-1,1) != "\\")
       {
-        s += @"\";
+        s += "\\";
       }
       Properties.Settings.Default.projectFolder = s;
       Properties.Settings.Default.Save();
-      if (cancelButton.Command.CanExecute(cancelButton.CommandParameter)){
-        cancelButton.Command.Execute(cancelButton.CommandParameter);
+      if (cancelButton.Command.CanExecute(
+        cancelButton.CommandParameter)){
+        cancelButton.Command.Execute(
+          cancelButton.CommandParameter);
       }
     }
 
